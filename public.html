@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label, input {
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Management</h1>
+
+    <form id="userForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+
+        <button type="submit">Add User</button>
+    </form>
+
+    <h2>Users</h2>
+    <ul id="userList"></ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userForm = document.getElementById('userForm');
+            const userList = document.getElementById('userList');
+
+            // Fetch and display existing users
+            fetch('/users')
+                .then(response => response.json())
+                .then(users => {
+                    userList.innerHTML = users.map(user => `<li data-id="${user._id}">${user.name} - ${user.email} <button onclick="deleteUser('${user._id}')">Delete</button></li>`).join('');
+                });
+
+            // Add user
+            userForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                fetch('/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password }),
+                })
+                .then(response => response.json())
+                .then(user => {
+                    userList.innerHTML += `<li data-id="${user._id}">${user.name} - ${user.email} <button onclick="deleteUser('${user._id}')">Delete</button></li>`;
+                    userForm.reset();
+                });
+            });
+        });
+
+        // Delete user
+        function deleteUser(id) {
+            fetch(`/users/${id}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(() => {
+                const listItem = document.querySelector(`li[data-id="${id}"]`);
+                listItem.remove();
+            });
+        }
+    </script>
+</body>
+</html>
