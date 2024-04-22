@@ -6,7 +6,6 @@ const middleware = (req,res,next)=>{
     next();
 }
 
-
 //middleware();
 app.get('/', (req, res) => {
     res.send("Hello World!");
